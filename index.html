@@ -3,7 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Mis Finanzas</title>
+<title>Cuadra</title>
+<link rel="icon" href="favicon.ico" sizes="any">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 
 <style>
@@ -13,7 +14,7 @@
   --ink: #0b0b0b; --ink-2: #52514e; --muted: #898781;
   --grid: #e1e0d9; --border: rgba(11,11,11,.10);
   --accent: #2a78d6; --good: #006300; --critical: #d03b3b; --warning: #b57a00;
-  --hero-a: #1c5cab; --hero-b: #4a3aa7;
+  --hero-a: #14524C; --hero-b: #0E3A36; --marca: #14524C;
   --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --s4:#eda100; --s5:#e87ba4; --s6:#008300; --s7:#4a3aa7; --s8:#898781;
 }
 @media (prefers-color-scheme: dark) {
@@ -23,7 +24,7 @@
     --ink: #ffffff; --ink-2: #c3c2b7; --muted: #898781;
     --grid: #2c2c2a; --border: rgba(255,255,255,.10);
     --accent: #3987e5; --good: #0ca30c; --critical: #e66767; --warning: #fab219;
-    --hero-a: #104281; --hero-b: #3a2d8a;
+    --hero-a: #14524C; --hero-b: #0E1716; --marca: #7CC4B6;
     --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500; --s5:#d55181; --s6:#008300; --s7:#9085e9; --s8:#6f6e69;
   }
 }
@@ -33,7 +34,7 @@
   --ink: #ffffff; --ink-2: #c3c2b7; --muted: #898781;
   --grid: #2c2c2a; --border: rgba(255,255,255,.10);
   --accent: #3987e5; --good: #0ca30c; --critical: #e66767; --warning: #fab219;
-  --hero-a: #104281; --hero-b: #3a2d8a;
+  --hero-a: #14524C; --hero-b: #0E1716; --marca: #7CC4B6;
   --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500; --s5:#d55181; --s6:#008300; --s7:#9085e9; --s8:#6f6e69;
 }
 * { box-sizing: border-box; }
@@ -42,6 +43,8 @@ body { margin: 0; background: var(--page); color: var(--ink);
 .wrap { max-width: 1080px; margin: 0 auto; padding: 20px 16px 60px; }
 header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
 header h1 { font-size: 22px; margin: 0; }
+header h1.marca { display: flex; align-items: center; gap: 8px; font-size: 25px; letter-spacing: -.5px; }
+header h1.marca .iso { fill: var(--marca); }
 header small { color: var(--muted); }
 .theme-btn { border: 1px solid var(--border); background: var(--surface); color: var(--ink);
   border-radius: 999px; padding: 6px 12px; cursor: pointer; }
@@ -105,8 +108,8 @@ form.add label { display: grid; gap: 4px; font-size: 13px; color: var(--ink-2); 
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Finanzas">
-<meta name="theme-color" content="#1c5cab">
+<meta name="apple-mobile-web-app-title" content="Cuadra">
+<meta name="theme-color" content="#14524C">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
 <style>
@@ -118,7 +121,7 @@ form.add label { display: grid; gap: 4px; font-size: 13px; color: var(--ink-2); 
 #candado input[type=password] { width: 100%; font-size: 17px; padding: 14px; border-radius: 12px; border: 0;
   background: rgba(255,255,255,.95); color: #0b0b0b; }
 #candado button { width: 100%; margin-top: 12px; font: inherit; font-size: 17px; font-weight: 600; padding: 14px;
-  border: 0; border-radius: 12px; background: #fff; color: #1c5cab; }
+  border: 0; border-radius: 12px; background: #E9A23B; color: #13201F; }
 #candado label { display: flex; gap: 8px; justify-content: center; align-items: center; margin-top: 14px; font-size: 14px; opacity: .9; }
 #candado .err { color: #ffd2d2; min-height: 20px; margin-top: 10px; font-size: 14px; }
 .salir { margin-left: 6px; }
@@ -128,7 +131,7 @@ form.add label { display: grid; gap: 4px; font-size: 13px; color: var(--ink-2); 
 <div id="candado">
   <form class="caja" id="f-clave">
     <img src="icon-180.png" width="72" height="72" alt="" style="border-radius:18px">
-    <h1>Mis Finanzas</h1>
+    <h1>cuadra</h1>
     <p>Escribe tu clave para abrir tus datos</p>
     <input type="password" id="clave" autocomplete="current-password" placeholder="Tu clave" required>
     <label><input type="checkbox" id="recordar" checked> Recordar en este celular</label>
@@ -194,7 +197,7 @@ if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js");
 </script>
 <div class="wrap">
   <header>
-    <div><h1>Mis Finanzas</h1><small id="actualizado"></small></div>
+    <div><h1 class="marca"><svg viewBox="0 0 100 100" width="30" height="30" aria-hidden="true"><g class="iso"><rect x="22" y="16.5" width="44" height="11" rx="5.5" transform="rotate(-30 44 22)"/><rect x="30" y="36.5" width="48" height="11" rx="5.5" transform="rotate(-14 54 42)"/><rect x="20" y="54.5" width="60" height="11" rx="5.5"/></g><rect x="20" y="74.5" width="60" height="11" rx="5.5" fill="#E9A23B"/></svg>cuadra</h1><small id="actualizado"></small></div>
     <button class="theme-btn" id="tema" title="Cambiar tema">◐ Tema</button>
   </header>
   <nav id="tabs">
