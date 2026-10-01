@@ -1,0 +1,627 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mis Finanzas</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+
+<style>
+:root {
+  color-scheme: light;
+  --page: #f4f3ef; --surface: #fcfcfb; --surface-2: #f0efec;
+  --ink: #0b0b0b; --ink-2: #52514e; --muted: #898781;
+  --grid: #e1e0d9; --border: rgba(11,11,11,.10);
+  --accent: #2a78d6; --good: #006300; --critical: #d03b3b; --warning: #b57a00;
+  --hero-a: #1c5cab; --hero-b: #4a3aa7;
+  --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --s4:#eda100; --s5:#e87ba4; --s6:#008300; --s7:#4a3aa7; --s8:#898781;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --page: #0d0d0d; --surface: #1a1a19; --surface-2: #242422;
+    --ink: #ffffff; --ink-2: #c3c2b7; --muted: #898781;
+    --grid: #2c2c2a; --border: rgba(255,255,255,.10);
+    --accent: #3987e5; --good: #0ca30c; --critical: #e66767; --warning: #fab219;
+    --hero-a: #104281; --hero-b: #3a2d8a;
+    --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500; --s5:#d55181; --s6:#008300; --s7:#9085e9; --s8:#6f6e69;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --page: #0d0d0d; --surface: #1a1a19; --surface-2: #242422;
+  --ink: #ffffff; --ink-2: #c3c2b7; --muted: #898781;
+  --grid: #2c2c2a; --border: rgba(255,255,255,.10);
+  --accent: #3987e5; --good: #0ca30c; --critical: #e66767; --warning: #fab219;
+  --hero-a: #104281; --hero-b: #3a2d8a;
+  --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500; --s5:#d55181; --s6:#008300; --s7:#9085e9; --s8:#6f6e69;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--page); color: var(--ink);
+  font: 15px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; }
+.wrap { max-width: 1080px; margin: 0 auto; padding: 20px 16px 60px; }
+header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+header h1 { font-size: 22px; margin: 0; }
+header small { color: var(--muted); }
+.theme-btn { border: 1px solid var(--border); background: var(--surface); color: var(--ink);
+  border-radius: 999px; padding: 6px 12px; cursor: pointer; }
+nav { display: flex; gap: 6px; overflow-x: auto; margin-bottom: 18px; padding-bottom: 2px; }
+nav button { flex: none; border: 1px solid var(--border); background: var(--surface); color: var(--ink-2);
+  padding: 8px 14px; border-radius: 999px; cursor: pointer; font: inherit; }
+nav button.on { background: var(--ink); color: var(--page); border-color: var(--ink); }
+section { display: none; } section.on { display: block; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 18px; margin-bottom: 14px; }
+.card h2 { font-size: 15px; margin: 0 0 4px; } .card .sub { color: var(--muted); font-size: 13px; margin: 0 0 12px; }
+.hero { background: linear-gradient(135deg, var(--hero-a), var(--hero-b)); color: #fff; border: 0; }
+.hero .lbl { opacity: .8; font-size: 14px; }
+.hero .big { font-size: 40px; font-weight: 700; letter-spacing: -.5px; margin: 2px 0 6px; }
+.hero .row { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 14px; }
+.pill { display: inline-block; background: rgba(255,255,255,.18); padding: 3px 10px; border-radius: 999px; font-weight: 600; }
+.grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.grid2 { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
+.tile .lbl { color: var(--ink-2); font-size: 13px; } .tile .val { font-size: 26px; font-weight: 700; margin-top: 2px; }
+.tile .hint { color: var(--muted); font-size: 12.5px; }
+.meter { height: 8px; background: var(--surface-2); border-radius: 99px; margin-top: 10px; overflow: hidden; }
+.meter i { display: block; height: 100%; background: var(--accent); border-radius: 99px; }
+.alert { border-left: 4px solid var(--critical); }
+.alert.warn { border-left-color: var(--warning); }
+.alert.ok { border-left-color: var(--good); }
+.alert h2::before { margin-right: 6px; }
+.alert.crit h2::before { content: "⚠"; color: var(--critical); }
+.alert.warn h2::before { content: "●"; color: var(--warning); }
+.alert.ok h2::before { content: "✓"; color: var(--good); }
+.chart-box { position: relative; height: 280px; }
+.bars .b { display: grid; grid-template-columns: 170px 1fr 110px; align-items: center; gap: 10px; padding: 5px 0; cursor: default; }
+.bars .b span.n { font-size: 14px; } .bars .b span.v { text-align: right; font-variant-numeric: tabular-nums; font-size: 14px; }
+.bars .track { height: 12px; }
+.bars .fill { height: 12px; border-radius: 0 4px 4px 0; min-width: 2px; }
+.dot { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th { text-align: left; color: var(--muted); font-weight: 500; font-size: 12.5px; padding: 6px 8px; border-bottom: 1px solid var(--grid); }
+td { padding: 7px 8px; border-bottom: 1px solid var(--grid); }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.neg { color: var(--good); }
+.tbl-wrap { overflow-x: auto; }
+select, input { font: inherit; color: var(--ink); background: var(--surface-2); border: 1px solid var(--border);
+  border-radius: 8px; padding: 6px 8px; }
+td select { padding: 3px 6px; font-size: 13px; max-width: 190px; }
+.filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.filters input { flex: 1; min-width: 160px; }
+.sim { display: flex; flex-wrap: wrap; gap: 18px; align-items: center; }
+.sim input[type=range] { flex: 1; min-width: 220px; padding: 0; accent-color: var(--accent); background: none; border: 0; }
+.sim .out { font-size: 28px; font-weight: 700; }
+form.add { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); align-items: end; }
+form.add label { display: grid; gap: 4px; font-size: 13px; color: var(--ink-2); }
+.btn { background: var(--accent); color: #fff; border: 0; border-radius: 10px; padding: 9px 14px; font: inherit; font-weight: 600; cursor: pointer; }
+.btn.ghost { background: transparent; color: var(--critical); padding: 2px 6px; }
+.note { color: var(--muted); font-size: 12.5px; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 13px; color: var(--ink-2); margin: 0 0 10px; }
+@media (max-width: 560px) {
+  .hero .big { font-size: 32px; }
+  .bars .b { grid-template-columns: 110px 1fr 86px; }
+  .bars .b span.n { font-size: 13px; }
+}
+</style>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Finanzas">
+<meta name="theme-color" content="#1c5cab">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<style>
+.wrap { padding-top: max(20px, env(safe-area-inset-top)); padding-bottom: max(60px, env(safe-area-inset-bottom)); }
+#candado { position: fixed; inset: 0; z-index: 10; display: grid; place-items: center; padding: 24px;
+  background: linear-gradient(160deg, var(--hero-a), var(--hero-b)); color: #fff; }
+#candado .caja { width: 100%; max-width: 340px; text-align: center; }
+#candado h1 { font-size: 26px; margin: 12px 0 4px; } #candado p { opacity: .85; margin: 0 0 20px; }
+#candado input[type=password] { width: 100%; font-size: 17px; padding: 14px; border-radius: 12px; border: 0;
+  background: rgba(255,255,255,.95); color: #0b0b0b; }
+#candado button { width: 100%; margin-top: 12px; font: inherit; font-size: 17px; font-weight: 600; padding: 14px;
+  border: 0; border-radius: 12px; background: #fff; color: #1c5cab; }
+#candado label { display: flex; gap: 8px; justify-content: center; align-items: center; margin-top: 14px; font-size: 14px; opacity: .9; }
+#candado .err { color: #ffd2d2; min-height: 20px; margin-top: 10px; font-size: 14px; }
+.salir { margin-left: 6px; }
+</style>
+</head>
+<body>
+<div id="candado">
+  <form class="caja" id="f-clave">
+    <img src="icon-180.png" width="72" height="72" alt="" style="border-radius:18px">
+    <h1>Mis Finanzas</h1>
+    <p>Escribe tu clave para abrir tus datos</p>
+    <input type="password" id="clave" autocomplete="current-password" placeholder="Tu clave" required>
+    <label><input type="checkbox" id="recordar" checked> Recordar en este celular</label>
+    <button>Abrir</button>
+    <div class="err" id="c-err"></div>
+  </form>
+</div>
+<script>
+const b64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+const LS = { get(k) { try { return localStorage.getItem(k); } catch { return null; } },
+             set(k, v) { try { localStorage.setItem(k, v); } catch {} }, del(k) { try { localStorage.removeItem(k); } catch {} } };
+async function bajar() { const r = await fetch("datos.enc.json", { cache: "no-cache" }); return r.json(); }
+async function descifrar(e, llave) {
+  const txt = await crypto.subtle.decrypt({ name: "AES-GCM", iv: b64(e.iv) }, llave, b64(e.datos));
+  return JSON.parse(new TextDecoder().decode(txt));
+}
+async function derivar(clave, e) {
+  const base = await crypto.subtle.importKey("raw", new TextEncoder().encode(clave), "PBKDF2", false, ["deriveKey"]);
+  return crypto.subtle.deriveKey({ name: "PBKDF2", salt: b64(e.sal), iterations: e.iter, hash: "SHA-256" },
+    base, { name: "AES-GCM", length: 256 }, true, ["decrypt"]);
+}
+function arrancar(datos) {
+  window.DATOS = datos;
+  document.getElementById("candado").remove();
+  const s = document.createElement("script");
+  s.textContent = document.getElementById("app-code").textContent;
+  document.body.appendChild(s);
+  const b = document.createElement("button");
+  b.className = "theme-btn salir"; b.textContent = "🔒 Bloquear";
+  b.onclick = () => { LS.del("fin.llave"); location.reload(); };
+  document.querySelector("header").appendChild(b);
+}
+(async () => {
+  let e;
+  try { e = await bajar(); } catch { document.getElementById("c-err").textContent = "Sin conexión y sin copia guardada."; return; }
+  const guardada = LS.get("fin.llave");
+  if (guardada) {
+    try {
+      const g = JSON.parse(guardada);
+      if (g.sal === e.sal) {
+        const llave = await crypto.subtle.importKey("raw", b64(g.k), "AES-GCM", false, ["decrypt"]);
+        return arrancar(await descifrar(e, llave));
+      }
+    } catch {}
+    LS.del("fin.llave");
+  }
+  document.getElementById("clave").focus();
+  document.getElementById("f-clave").onsubmit = async ev => {
+    ev.preventDefault();
+    const err = document.getElementById("c-err"); err.textContent = "Abriendo…";
+    try {
+      const llave = await derivar(document.getElementById("clave").value, e);
+      const datos = await descifrar(e, llave);
+      if (document.getElementById("recordar").checked) {
+        const raw = new Uint8Array(await crypto.subtle.exportKey("raw", llave));
+        LS.set("fin.llave", JSON.stringify({ sal: e.sal, k: btoa(String.fromCharCode(...raw)) }));
+      }
+      arrancar(datos);
+    } catch { err.textContent = "Clave incorrecta."; }
+  };
+})();
+if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js");
+</script>
+<div class="wrap">
+  <header>
+    <div><h1>Mis Finanzas</h1><small id="actualizado"></small></div>
+    <button class="theme-btn" id="tema" title="Cambiar tema">◐ Tema</button>
+  </header>
+  <nav id="tabs">
+    <button data-t="resumen" class="on">Resumen</button>
+    <button data-t="gastos">Gastos</button>
+    <button data-t="deuda">Deuda y plan</button>
+    <button data-t="movs">Movimientos</button>
+    <button data-t="anotar">Anotar gasto</button>
+  </nav>
+
+  <!-- RESUMEN -->
+  <section id="resumen" class="on">
+    <div class="card hero">
+      <div class="lbl">Debes hoy en tu RappiCard (pago total)</div>
+      <div class="big" id="h-total"></div>
+      <div class="row">
+        <span>Fecha límite: <span class="pill" id="h-fecha"></span></span>
+        <span id="h-dias"></span>
+      </div>
+      <div class="row" id="h-pago" style="margin-top:12px"></div>
+    </div>
+    <div class="grid">
+      <div class="card tile"><div class="lbl">Pago mínimo</div><div class="val" id="t-min"></div>
+        <div class="hint">Menos que esto te cobra intereses sobre la diferencia</div></div>
+      <div class="card tile"><div class="lbl">Cupo usado</div><div class="val" id="t-cupo"></div>
+        <div class="meter"><i id="t-cupo-bar"></i></div><div class="hint" id="t-cupo-h"></div></div>
+      <div class="card tile"><div class="lbl">Intereses pagados</div><div class="val" id="t-int"></div>
+        <div class="hint" id="t-int-h"></div></div>
+      <div class="card tile"><div class="lbl">Saldo en tu cuenta</div><div class="val" id="t-saldo"></div>
+        <div class="hint" id="t-saldo-h"></div></div>
+    </div>
+    <div class="card">
+      <h2>Tu mes promedio</h2>
+      <p class="sub" id="f-sub"></p>
+      <div class="grid">
+        <div class="tile"><div class="lbl">Te entra</div><div class="val" id="f-ent"></div><div class="hint" id="f-ent-h"></div></div>
+        <div class="tile"><div class="lbl">Gastas</div><div class="val" id="f-sal"></div><div class="hint">Tarjeta + cuenta (sin contar los pagos a la tarjeta)</div></div>
+        <div class="tile"><div class="lbl" id="f-res-l"></div><div class="val" id="f-res"></div><div class="hint" id="f-res-h"></div></div>
+      </div>
+    </div>
+    <div id="alertas"></div>
+  </section>
+
+  <!-- GASTOS -->
+  <section id="gastos">
+    <div class="card">
+      <h2>¿En qué se va la plata?</h2>
+      <p class="sub" id="g-sub"></p>
+      <div class="bars" id="g-cats"></div>
+    </div>
+    <div class="card">
+      <h2>Lo que entra vs. lo que sale</h2>
+      <p class="sub">Por mes, en los meses que tenemos cuenta y tarjeta completas</p>
+      <div class="legend"><span><span class="dot" style="background:var(--s3)"></span>Te entró</span><span><span class="dot" style="background:var(--s2)"></span>Gastaste</span></div>
+      <div class="chart-box"><canvas id="c-flujo"></canvas></div>
+    </div>
+    <div class="card">
+      <h2>Gasto por mes</h2>
+      <p class="sub">Tarjeta + cuenta + lo que anotes a mano, por mes calendario</p>
+      <div class="legend" id="g-legend"></div>
+      <div class="chart-box"><canvas id="c-meses"></canvas></div>
+      <p class="note" id="g-falta"></p>
+    </div>
+    <div class="card">
+      <h2>Dónde más gastas</h2>
+      <p class="sub">Top 10 comercios</p>
+      <div class="bars" id="g-top"></div>
+    </div>
+  </section>
+
+  <!-- DEUDA -->
+  <section id="deuda">
+    <div class="card">
+      <h2>Simulador: ¿en cuánto tiempo sales?</h2>
+      <p class="sub">Si dejas de usar la tarjeta y abonas lo mismo cada mes (tasa estimada <span id="s-tasa"></span> E.A.)</p>
+      <div class="sim">
+        <input type="range" id="s-pago" step="50000">
+        <div><div class="note">Abono mensual</div><div class="out" id="s-pago-v"></div></div>
+      </div>
+      <div class="grid" style="margin-top:14px">
+        <div class="tile"><div class="lbl">Sales en</div><div class="val" id="s-meses"></div><div class="hint" id="s-fecha"></div></div>
+        <div class="tile"><div class="lbl">Pagas de intereses</div><div class="val" id="s-int"></div><div class="hint">Estimado, sin compras nuevas</div></div>
+      </div>
+    </div>
+    <div class="grid2">
+      <div class="card"><h2>Lo que debes, mes a mes</h2><p class="sub">Pago total de cada extracto</p>
+        <div class="chart-box"><canvas id="c-deuda"></canvas></div></div>
+      <div class="card"><h2>Intereses cobrados por mes</h2><p class="sub">Intereses corrientes de cada extracto</p>
+        <div class="chart-box"><canvas id="c-int"></canvas></div></div>
+    </div>
+    <div class="card">
+      <h2>Compras que todavía estás pagando a cuotas</h2>
+      <p class="sub">Del último extracto: estas son las que te generan intereses</p>
+      <div class="tbl-wrap"><table id="cuotas"></table></div>
+    </div>
+  </section>
+
+  <!-- MOVIMIENTOS -->
+  <section id="movs">
+    <div class="card">
+      <h2>Todos los movimientos</h2>
+      <p class="sub">Si una compra quedó en la categoría equivocada, cámbiala aquí y se recuerda</p>
+      <div class="filters">
+        <input id="m-buscar" placeholder="Buscar comercio o persona…">
+        <select id="m-cat"><option value="">Todas las categorías</option></select>
+        <select id="m-fuente"><option value="">Tarjeta y cuenta</option><option>RappiCard</option><option>Banco de Bogotá</option></select>
+      </div>
+      <div class="tbl-wrap"><table id="m-tabla"></table></div>
+    </div>
+  </section>
+
+  <!-- ANOTAR -->
+  <section id="anotar">
+    <div class="card">
+      <h2>Anotar un gasto (efectivo, Nequi, otra tarjeta…)</h2>
+      <p class="sub">Se suma a tus gráficas de gastos</p>
+      <form class="add" id="f-add">
+        <label>Fecha<input type="date" name="fecha" required></label>
+        <label>Descripción<input name="descripcion" required placeholder="Almuerzo"></label>
+        <label>Valor<input type="number" name="valor" min="1" step="100" required placeholder="25000"></label>
+        <label>Categoría<select name="categoria"></select></label>
+        <label>Medio<select name="medio"><option>Efectivo</option><option>Nequi</option><option>Daviplata</option><option>Débito</option><option>Otro</option></select></label>
+        <button class="btn">Agregar</button>
+      </form>
+    </div>
+    <div class="card">
+      <h2>Tus gastos anotados</h2>
+      <div class="tbl-wrap"><table id="manuales"></table></div>
+    </div>
+  </section>
+</div>
+
+<script type="text/plain" id="app-code">
+const D = window.DATOS;
+const $ = s => document.querySelector(s);
+const fmt = n => "$" + Math.round(n).toLocaleString("es-CO");
+const fmtK = n => n >= 1e6 ? "$" + (n / 1e6).toFixed(1).replace(".", ",") + " M" : "$" + Math.round(n / 1000) + " mil";
+const MES = ["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];
+const fechaTxt = s => { const [a, m, d] = s.split("-"); return `${+d} ${MES[m - 1]} ${a}`; };
+const mesTxt = s => { const [a, m] = s.split("-"); return MES[m - 1][0].toUpperCase() + MES[m - 1].slice(1) + " " + a.slice(2); };
+
+// ---- almacenamiento local (tolerante a fallos) ----
+const memoria = {};  // respaldo si el navegador no deja guardar
+const store = {
+  get(k, def) { try { const v = localStorage.getItem(k); if (v !== null) return JSON.parse(v); } catch {} return k in memoria ? memoria[k] : def; },
+  set(k, v) { memoria[k] = v; try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
+};
+let overrides = store.get("fin.categorias", {});
+let manuales = store.get("fin.manuales", []);
+
+const CATS = D.categorias;
+const color = c => getComputedStyle(document.documentElement).getPropertyValue("--s" + (CATS.indexOf(c) + 1)).trim();
+const idMov = m => m.fecha + "|" + m.descripcion + "|" + m.valor;
+const catDe = m => overrides[idMov(m)] || m.categoria;
+
+const periodos = D.periodos;
+const conDetalle = periodos.filter(p => p.fuente === "pdf");
+const ultimo = conDetalle[conDetalle.length - 1];
+
+// gastos = compras con tarjeta + salidas de la cuenta (sin los pagos a la tarjeta) + lo anotado a mano
+function compras() {
+  const t = D.movimientos.filter(m => m.tipo === "compra").map(m => ({ ...m, categoria: catDe(m), medio: m.fuente }));
+  const man = manuales.map(m => ({ ...m, comercio: m.descripcion }));
+  return t.concat(man).map(m => ({ ...m, mes: m.fecha.slice(0, 7) }));
+}
+const ingresos = D.movimientos.filter(m => m.tipo === "ingreso");
+// meses con cuenta y tarjeta completas
+const mesesCompletos = [...new Set(D.movimientos.filter(m => m.fuente === "Banco de Bogotá").map(m => m.fecha.slice(0, 7)))].sort();
+
+// ---- tema ----
+$("#tema").onclick = () => {
+  const r = document.documentElement;
+  const oscuro = r.dataset.theme ? r.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+  r.dataset.theme = oscuro ? "light" : "dark";
+  store.set("fin.tema", r.dataset.theme);
+  pintarTodo();
+};
+const temaGuardado = store.get("fin.tema", null);
+if (temaGuardado) document.documentElement.dataset.theme = temaGuardado;
+
+// ---- pestañas ----
+document.querySelectorAll("#tabs button").forEach(b => b.onclick = () => {
+  document.querySelectorAll("#tabs button").forEach(x => x.classList.toggle("on", x === b));
+  document.querySelectorAll("section").forEach(s => s.classList.toggle("on", s.id === b.dataset.t));
+  store.set("fin.tab", b.dataset.t);
+  [chMeses, chDeuda, chInt, chFlujo].forEach(c => c?.resize());
+});
+
+// ---- RESUMEN ----
+function pintarResumen() {
+  $("#actualizado").textContent = "Último extracto: corte " + fechaTxt(ultimo.hasta);
+  $("#h-total").textContent = fmt(ultimo.pago_total);
+  $("#h-fecha").textContent = fechaTxt(ultimo.fecha_pago);
+  const hoy = new Date(); hoy.setHours(0, 0, 0, 0);
+  const dias = Math.round((new Date(ultimo.fecha_pago + "T00:00") - hoy) / 864e5);
+  $("#h-dias").textContent = dias > 1 ? `Faltan ${dias} días` : dias === 1 ? "⏰ Vence mañana" : dias === 0 ? "⏰ Vence HOY" : "Revisa si ya pagaste este extracto";
+  $("#t-min").textContent = fmt(ultimo.pago_minimo);
+  const uso = ultimo.pago_total / ultimo.cupo_total;
+  $("#t-cupo").textContent = Math.round(uso * 100) + " %";
+  $("#t-cupo-bar").style.width = Math.min(100, uso * 100) + "%";
+  $("#t-cupo-h").textContent = `${fmt(ultimo.pago_total)} de ${fmt(ultimo.cupo_total)}`;
+  const intTot = conDetalle.reduce((s, p) => s + p.intereses_corrientes + p.intereses_mora, 0);
+  $("#t-int").textContent = fmt(intTot);
+  $("#t-int-h").textContent = `En ${conDetalle.length} extractos (${mesTxt(conDetalle[0].hasta)} – ${mesTxt(ultimo.hasta)})`;
+  $("#t-saldo").textContent = fmt(D.cuenta.saldo_final);
+  $("#t-saldo-h").textContent = "Banco de Bogotá, al " + fechaTxt(D.cuenta.hasta);
+
+  const n = mesesCompletos.length, enMes = m => mesesCompletos.includes(m.fecha.slice(0, 7));
+  const ent = ingresos.filter(enMes).reduce((s, m) => s + m.valor, 0) / n;
+  const sueldo = ingresos.filter(m => enMes(m) && m.categoria === "Sueldo").reduce((s, m) => s + m.valor, 0) / n;
+  const sal = compras().filter(enMes).reduce((s, m) => s + m.valor, 0) / n;
+  $("#f-sub").textContent = `Promedio de ${mesTxt(mesesCompletos[0] + "-01")} a ${mesTxt(mesesCompletos[n - 1] + "-01")} (${n} meses con cuenta y tarjeta)`;
+  $("#f-ent").textContent = fmt(ent);
+  $("#f-ent-h").textContent = `Sueldo: ${fmt(sueldo)} · el resto: fondo de empleados y transferencias`;
+  $("#f-sal").textContent = fmt(sal);
+  $("#f-res-l").textContent = ent >= sal ? "Te sobra" : "Te falta";
+  $("#f-res").textContent = fmt(Math.abs(ent - sal));
+  $("#f-res").style.color = ent >= sal ? "var(--good)" : "var(--critical)";
+  $("#f-res-h").textContent = ent >= sal ? "Al mes, en promedio" : `Gastas ${Math.round(sal / sueldo * 100)} % de tu sueldo`;
+
+  const pend = D.cuotas_pendientes.reduce((s, t) => s + t.pendiente, 0);
+  const subs = D.cuotas_pendientes.filter(t => /CLAUDE|ANTHROPIC/i.test(t.descripcion));
+  const pagado = store.get("fin.pagado", {})[ultimo.fecha_pago];
+  $("#h-pago").innerHTML = pagado
+    ? `<span class="pill">✓ Ya pagaste el ${pagado} de este extracto</span> <button class="theme-btn" id="h-deshacer" style="padding:3px 10px">Deshacer</button>`
+    : `<button class="theme-btn" data-p="mínimo">Ya pagué el mínimo</button> <button class="theme-btn" data-p="total">Ya pagué el total</button>`;
+  $("#h-pago").querySelectorAll("button").forEach(b => b.onclick = () => {
+    const p = store.get("fin.pagado", {});
+    if (b.dataset.p) p[ultimo.fecha_pago] = b.dataset.p; else delete p[ultimo.fecha_pago];
+    store.set("fin.pagado", p); pintarResumen();
+  });
+  if (pagado === "total") $("#h-dias").textContent = "Quedaste en $0 🎉";
+  else if (pagado) $("#h-dias").textContent = `Queda por pagar: ${fmt(ultimo.pago_total - ultimo.pago_minimo)} (cuotas pendientes)`;
+  // saldo real que el usuario ve hoy en la app de Rappi (incluye compras después del corte)
+  const real = store.get("fin.saldoReal", null);
+  if (pagado) {
+    $("#h-pago").insertAdjacentHTML("beforeend", `<label style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">Saldo que ves hoy en Rappi:
+      <input id="h-real" type="number" min="0" step="1000" value="${real?.valor ?? ""}" placeholder="Ej: 1338655" style="width:150px;background:rgba(255,255,255,.15);color:#fff;border-color:rgba(255,255,255,.3)"></label>`);
+    $("#h-real").onchange = e => { const v = +e.target.value; store.set("fin.saldoReal", v ? { valor: v, fecha: new Date().toISOString().slice(0, 10) } : null); pintarResumen(); };
+  }
+  if (pagado && real) {
+    document.querySelector(".hero .lbl").textContent = `Debes hoy (según Rappi, ${fechaTxt(real.fecha)})`;
+    $("#h-total").textContent = fmt(real.valor);
+    const nuevo = real.valor - (ultimo.pago_total - ultimo.pago_minimo);
+    $("#h-dias").textContent = nuevo > 0 ? `${fmt(ultimo.pago_total - ultimo.pago_minimo)} de cuotas + ${fmt(nuevo)} de compras nuevas después del corte` : "";
+  } else {
+    document.querySelector(".hero .lbl").textContent = "Debes hoy en tu RappiCard (pago total)";
+  }
+  let html = "";
+  if (pagado === "mínimo") html += `<div class="card alert ok"><h2>Pagaste el mínimo a tiempo</h2>
+    <p>Lo único que queda son las cuotas pendientes (<b>${fmt(pend)}</b>). <b>Meta:</b> en el próximo extracto, paga el <b>total</b> y quedas en $0.
+    Mientras tanto, usa la tarjeta lo menos posible.</p></div>`;
+  if (!pagado && dias >= 0 && dias <= 5) html += `<div class="card alert crit"><h2>Tu pago vence ${dias === 0 ? "hoy" : dias === 1 ? "mañana" : "en " + dias + " días"}</h2>
+    <p>Si puedes, paga el <b>total (${fmt(ultimo.pago_total)})</b>: así no te cobran intereses y se liquidan las cuotas pendientes.
+    Si no alcanzas, paga al menos el <b>mínimo (${fmt(ultimo.pago_minimo)})</b>. El "pago alternativo" (${fmt(ultimo.pago_alternativo)}) evita la mora,
+    pero lo que falte para el mínimo pasa al mes siguiente con intereses.</p>
+    <p class="note">Se paga en la app de Rappi → RappiCard → Pagar (RappiPay o PSE).</p></div>`;
+  if (subs.length) html += `<div class="card alert warn"><h2>Tu suscripción de Claude se está difiriendo a 36 cuotas</h2>
+    <p>Cada mes el cobro de la suscripción se va a <b>36 cuotas con ~${subs[subs.length - 1].tasa_ea} de interés anual</b>.
+    O sea, pagas una suscripción mensual durante 3 años, con intereses, y cada mes se suma una nueva.
+    Hoy llevas <b>${fmt(subs.reduce((s, t) => s + t.pendiente, 0))}</b> pendientes solo por eso.</p>
+    <p>👉 En la app de Rappi, en tu RappiCard, busca la opción de <b>cuotas por defecto / compras recurrentes</b> y ponla en <b>1 cuota</b>.
+    A 1 cuota la tasa es 0 % si pagas el total del mes.</p></div>`;
+  html += `<div class="card alert ok"><h2>Lo bueno</h2>
+    <p>Nunca has caído en mora (estado <b>Normal</b> y $0 de intereses de mora en todos los extractos).
+    Casi todos tus intereses vienen de las compras a cuotas: cuotas pendientes hoy <b>${fmt(pend)}</b>.</p></div>`;
+  $("#alertas").innerHTML = html;
+}
+
+// ---- GASTOS ----
+let chMeses, chDeuda, chInt, chFlujo;
+function barras(el, filas, total) {
+  const max = Math.max(...filas.map(f => f.v), 1);
+  el.innerHTML = filas.map(f => `<div class="b" title="${f.n}: ${fmt(f.v)}${total ? " (" + Math.round(f.v / total * 100) + " %)" : ""}">
+    <span class="n"><span class="dot" style="background:${f.c}"></span>${f.n}</span>
+    <div class="track"><div class="fill" style="width:${f.v / max * 100}%;background:${f.c}"></div></div>
+    <span class="v">${fmt(f.v)}${total ? ` <span class="note">${Math.round(f.v / total * 100)}%</span>` : ""}</span></div>`).join("");
+}
+function pintarGastos() {
+  const c = compras();
+  const total = c.reduce((s, m) => s + m.valor, 0);
+  const porCat = CATS.map(n => ({ n, c: color(n), v: c.filter(m => m.categoria === n).reduce((s, m) => s + m.valor, 0) }))
+    .filter(f => f.v > 0).sort((a, b) => b.v - a.v);
+  $("#g-sub").textContent = `${fmt(total)} en ${c.length} compras`;
+  barras($("#g-cats"), porCat, total);
+
+  const top = {};
+  c.filter(m => m.comercio !== "Impuesto 4x1000").forEach(m => { const k = m.comercio.replace(/CABIFYCO \w+/, "CABIFY").replace(/^aliexpress$/i, "ALIEXPRESS.COM")
+    .replace(/.*(ANTHROPIC|CLAUDE).*/i, "CLAUDE (suscripción)").replace(/A SU SERVICIO ASESORIAS?/, "A SU SERVICIO ASESORÍAS"); (top[k] ??= { v: 0, cat: m.categoria }).v += m.valor; });
+  barras($("#g-top"), Object.entries(top).sort((a, b) => b[1].v - a[1].v).slice(0, 10).map(([n, o]) => ({ n, v: o.v, c: color(o.cat) })));
+
+  const meses = [...new Set(c.map(m => m.mes))].sort();
+  const css0 = getComputedStyle(document.documentElement);
+  chFlujo?.destroy();
+  chFlujo = new Chart($("#c-flujo"), {
+    type: "bar",
+    data: { labels: mesesCompletos.map(m => mesTxt(m + "-01")), datasets: [
+      { label: "Te entró", backgroundColor: css0.getPropertyValue("--s3"), borderRadius: 4, borderSkipped: "bottom", maxBarThickness: 32,
+        data: mesesCompletos.map(p => ingresos.filter(m => m.fecha.startsWith(p)).reduce((s, m) => s + m.valor, 0)) },
+      { label: "Gastaste", backgroundColor: css0.getPropertyValue("--s2"), borderRadius: 4, borderSkipped: "bottom", maxBarThickness: 32,
+        data: mesesCompletos.map(p => c.filter(m => m.mes === p).reduce((s, m) => s + m.valor, 0)) }] },
+    options: { ...opcionesBase(), interaction: { mode: "index", intersect: false } }
+  });
+  $("#g-legend").innerHTML = CATS.map(n => `<span><span class="dot" style="background:${color(n)}"></span>${n}</span>`).join("");
+  const css = getComputedStyle(document.documentElement);
+  chMeses?.destroy();
+  chMeses = new Chart($("#c-meses"), {
+    type: "bar",
+    data: { labels: meses.map(m => mesTxt(m)), datasets: CATS.map(n => ({
+      label: n, backgroundColor: color(n), borderColor: css.getPropertyValue("--surface"), borderWidth: { top: 2 }, borderRadius: 4, borderSkipped: "bottom",
+      data: meses.map(p => c.filter(m => m.mes === p && m.categoria === n).reduce((s, m) => s + m.valor, 0)) })) },
+    options: opcionesBase({ stacked: true })
+  });
+  $("#g-falta").textContent = `La cuenta del banco va de ${fechaTxt(D.cuenta.desde)} a ${fechaTxt(D.cuenta.hasta)}; los otros meses solo tienen la tarjeta. ` +
+    "Compras de la tarjeta de feb 20 – mar 19 sin detalle (solo el resumen del correo).";
+}
+
+function opcionesBase({ stacked = false } = {}) {
+  const css = getComputedStyle(document.documentElement);
+  const muted = css.getPropertyValue("--muted"), grid = css.getPropertyValue("--grid");
+  return {
+    responsive: true, maintainAspectRatio: false, interaction: { mode: stacked ? "index" : "nearest", intersect: false },
+    plugins: { legend: { display: false }, tooltip: { callbacks: {
+      label: ctx => ctx.raw ? `${ctx.dataset.label}: ${fmt(ctx.raw)}` : null,
+      footer: items => stacked ? "Total: " + fmt(items.reduce((s, i) => s + i.raw, 0)) : "" } } },
+    scales: {
+      x: { stacked, grid: { display: false }, ticks: { color: muted } },
+      y: { stacked, grid: { color: grid }, border: { display: false }, ticks: { color: muted, callback: v => fmtK(v) } }
+    }
+  };
+}
+
+// ---- DEUDA ----
+function tasaEA() {
+  const t = D.cuotas_pendientes.map(x => parseFloat(x.tasa_ea.replace(",", ".")));
+  return t.length ? Math.max(...t) : 29;
+}
+function simular(saldo, pago, mv) {
+  let meses = 0, int = 0;
+  while (saldo > 1 && meses < 600) { const i = saldo * mv; int += i; saldo = saldo + i - pago; meses++; if (pago <= i) return null; }
+  return { meses, int };
+}
+function pintarDeuda() {
+  const ea = tasaEA(), mv = Math.pow(1 + ea / 100, 1 / 12) - 1;
+  $("#s-tasa").textContent = ea.toFixed(2).replace(".", ",") + " %";
+  const r = $("#s-pago"), saldo = ultimo.pago_total;
+  r.min = 100000; r.max = Math.ceil(saldo / 50000) * 50000;
+  if (!r.dataset.init) { r.value = 500000; r.dataset.init = 1; }
+  const upd = () => {
+    const p = +r.value; $("#s-pago-v").textContent = fmt(p);
+    const s = simular(saldo, p, mv);
+    if (!s) { $("#s-meses").textContent = "Nunca"; $("#s-fecha").textContent = "El abono no alcanza ni para los intereses"; $("#s-int").textContent = "—"; return; }
+    $("#s-meses").textContent = s.meses === 1 ? "1 mes" : s.meses + " meses";
+    const f = new Date(ultimo.fecha_pago + "T00:00"); f.setMonth(f.getMonth() + s.meses - 1);
+    $("#s-fecha").textContent = "Terminas en " + MES[f.getMonth()] + " " + f.getFullYear();
+    $("#s-int").textContent = fmt(s.int);
+  };
+  r.oninput = upd; upd();
+
+  const css = getComputedStyle(document.documentElement);
+  const acc = css.getPropertyValue("--accent"), crit = css.getPropertyValue("--s2");
+  chDeuda?.destroy();
+  chDeuda = new Chart($("#c-deuda"), {
+    type: "line",
+    data: { labels: periodos.map(p => mesTxt(p.hasta)), datasets: [{ label: "Pago total", data: periodos.map(p => p.pago_total),
+      borderColor: acc, backgroundColor: acc, borderWidth: 2, pointRadius: 4, pointHoverRadius: 6, tension: .25 }] },
+    options: opcionesBase()
+  });
+  chInt?.destroy();
+  chInt = new Chart($("#c-int"), {
+    type: "bar",
+    data: { labels: conDetalle.map(p => mesTxt(p.hasta)), datasets: [{ label: "Intereses", data: conDetalle.map(p => p.intereses_corrientes + p.intereses_mora),
+      backgroundColor: crit, borderRadius: 4, borderSkipped: "bottom", maxBarThickness: 36 }] },
+    options: opcionesBase()
+  });
+
+  $("#cuotas").innerHTML = `<tr><th>Fecha</th><th>Compra</th><th class="num">Valor</th><th>Cuota</th><th class="num">Te falta</th><th class="num">Tasa E.A.</th></tr>` +
+    D.cuotas_pendientes.map(t => `<tr><td>${fechaTxt(t.fecha)}</td><td>${t.descripcion}</td><td class="num">${fmt(t.valor)}</td>
+      <td>${t.cuotas}</td><td class="num">${fmt(t.pendiente)}</td><td class="num">${t.tasa_ea}</td></tr>`).join("") +
+    `<tr><td colspan="4"><b>Total pendiente</b></td><td class="num"><b>${fmt(D.cuotas_pendientes.reduce((s, t) => s + t.pendiente, 0))}</b></td><td></td></tr>`;
+}
+
+// ---- MOVIMIENTOS ----
+function pintarMovs() {
+  const q = $("#m-buscar").value.toLowerCase(), cat = $("#m-cat").value, fuente = $("#m-fuente").value;
+  const lista = D.movimientos.map(m => ({ ...m, cat: catDe(m) }))
+    .filter(m => (!q || (m.comercio + " " + m.descripcion).toLowerCase().includes(q)) && (!cat || m.cat === cat) && (!fuente || m.fuente.startsWith(fuente)))
+    .sort((a, b) => b.fecha.localeCompare(a.fecha));
+  $("#m-tabla").innerHTML = `<tr><th>Fecha</th><th>Comercio / persona</th><th>Categoría</th><th>Dónde</th><th>Cuotas</th><th class="num">Valor</th></tr>` +
+    lista.map(m => `<tr><td>${fechaTxt(m.fecha)}</td><td title="${m.descripcion.replace(/"/g, "")}">${m.comercio}</td><td>${m.tipo !== "compra" ? m.cat :
+      `<select data-id="${idMov(m)}">${CATS.map(c => `<option${c === m.cat ? " selected" : ""}>${c}</option>`).join("")}</select>`}</td>
+      <td class="note">${m.fuente === "RappiCard" ? "Tarjeta" : m.fuente.includes("SMS") ? "Cuenta (SMS)" : "Cuenta"}</td><td>${m.cuotas}</td>
+      <td class="num ${m.tipo === "ingreso" ? "neg" : ""}">${m.tipo === "ingreso" ? "+" : m.tipo === "compra" ? "−" : ""}${fmt(Math.abs(m.valor))}</td></tr>`).join("");
+  $("#m-tabla").querySelectorAll("select").forEach(s => s.onchange = () => {
+    overrides[s.dataset.id] = s.value; store.set("fin.categorias", overrides); pintarGastos();
+  });
+}
+$("#m-cat").innerHTML += CATS.map(c => `<option>${c}</option>`).join("") +
+  ["Pago a la tarjeta", "Sueldo", "Fondo de empleados", "Otros ingresos"].map(c => `<option>${c}</option>`).join("");
+$("#m-buscar").oninput = pintarMovs; $("#m-cat").onchange = pintarMovs; $("#m-fuente").onchange = pintarMovs;
+
+// ---- ANOTAR ----
+const f = $("#f-add");
+f.categoria.innerHTML = CATS.map(c => `<option>${c}</option>`).join("");
+f.fecha.value = new Date().toISOString().slice(0, 10);
+f.onsubmit = e => {
+  e.preventDefault();
+  manuales.push({ fecha: f.fecha.value, descripcion: f.descripcion.value.trim(), valor: +f.valor.value,
+    categoria: f.categoria.value, medio: f.medio.value, tipo: "compra" });
+  store.set("fin.manuales", manuales);
+  f.descripcion.value = ""; f.valor.value = "";
+  pintarManuales(); pintarGastos();
+};
+function pintarManuales() {
+  $("#manuales").innerHTML = manuales.length ? `<tr><th>Fecha</th><th>Descripción</th><th>Categoría</th><th>Medio</th><th class="num">Valor</th><th></th></tr>` +
+    manuales.map((m, i) => `<tr><td>${fechaTxt(m.fecha)}</td><td>${m.descripcion}</td><td>${m.categoria}</td><td>${m.medio}</td>
+      <td class="num">${fmt(m.valor)}</td><td><button class="btn ghost" data-i="${i}" title="Borrar">✕</button></td></tr>`).join("")
+    : `<tr><td class="note">Todavía no has anotado nada.</td></tr>`;
+  $("#manuales").querySelectorAll("button").forEach(b => b.onclick = () => {
+    manuales.splice(+b.dataset.i, 1); store.set("fin.manuales", manuales); pintarManuales(); pintarGastos();
+  });
+}
+function pintarTodo() { pintarResumen(); pintarGastos(); pintarDeuda(); pintarMovs(); pintarManuales(); }
+pintarTodo();
+const tab = store.get("fin.tab", null);
+if (tab) document.querySelector(`#tabs button[data-t="${tab}"]`)?.click();
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", pintarTodo);
+</script>
+</body>
+</html>
